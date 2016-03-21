@@ -9,29 +9,36 @@ Hashes 64-bit key to node, where data for that key stored
 
 */
 
-func Sum64(key uint64, n uint64) uint64 {
+func Sum64(key uint64, n uint64, excluded *[]bool) uint64 {
     var totalBuckets uint64 = Fact(n)
     bucketRange := 0xFFFFFFFFFFFFFFFF / totalBuckets
     bucket := key / bucketRange
-    return fairfast(bucket, n, 0, totalBuckets)
+    return fairfast(bucket, n, excluded, 0, totalBuckets)
 }
 
-func fairfast(bucket uint64, n uint64, rangeStart uint64, rangeEnd uint64) uint64 {
+func fairfast(bucket uint64, n uint64, excluded *[]bool, rangeStart uint64, rangeEnd uint64) uint64 {
     var i uint64
-    var f, l uint64 = 0, 1
+
+    // find first two included nodes
+    f := nextIncluded(0, excluded)
+    l := nextIncluded(f + 1, excluded)
+
+    var next uint64 = l
 
     for i = 2; i <= n; i++ {
+        
+        next = nextIncluded(next + 1, excluded)
 
         pivot := rangeStart + (rangeEnd - rangeStart) / i
         size := pivot - rangeStart        
         if bucket < pivot {
             // exclude first
-            f, l = l, i
+            f, l = l, next
             rangeEnd = pivot
 
         } else {
             // exclude last
-            f, l = f, i
+            f, l = f, next
 
             // quickly find the range for the node
             var cut uint64
@@ -47,6 +54,16 @@ func fairfast(bucket uint64, n uint64, rangeStart uint64, rangeEnd uint64) uint6
     } else {
         return l
     }
+}
+
+func nextIncluded(start uint64, excluded *[]bool) uint64 {
+    l := uint64(len(*excluded))
+    for i := start; i < l; i++ {
+        if ! (*excluded)[i] {
+            return i
+        }
+    }
+    return l
 }
 
 func Fact(n uint64) uint64 {
