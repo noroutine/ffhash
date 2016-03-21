@@ -1,5 +1,7 @@
 ### ffhash
 
+[![Go](https://img.shields.io/badge/Go-1.6-blue.svg)](https://golang.org/) [![Build Status](https://travis-ci.org/noroutine/ffhash.svg?branch=master)](https://travis-ci.org/noroutine/ffhash)
+
 Fast and fair consistent hash for small clusters (best < 18 nodes, maximum 20)
 
 Hashes 64-bit key to node, where data for that key stored
